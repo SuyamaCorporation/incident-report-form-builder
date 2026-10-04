@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident Report Form Builder</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  *:focus-visible { outline: 3px solid #3b82f6; outline-offset: 2px; }
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; font-size: 11px; }
+    .print-section { break-inside: avoid; margin-bottom: 16px; }
+    input, textarea, select { border: 1px solid #ccc !important; }
+  }
+</style>
+</head>
+<body class="bg-red-50 min-h-screen py-8 px-4" onload="loadDraft()">
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Incident Report</h1>
+      <p class="text-gray-500 text-sm">Complete all sections. Form auto-saves as you type.</p>
+    </div>
+    <button onclick="window.print()" class="no-print bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+      🖨 Print Report
+    </button>
+  </div>
+
+  <!-- Section 1: Incident Info -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-5 print-section">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">1</span>
+      Incident Information
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label for="inc-date" class="block text-sm font-medium text-gray-700 mb-1">Date of Incident</label>
+        <input type="date" id="inc-date" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition" />
+      </div>
+      <div>
+        <label for="inc-time" class="block text-sm font-medium text-gray-700 mb-1">Time of Incident</label>
+        <input type="time" id="inc-time" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition" />
+      </div>
+      <div>
+        <label for="inc-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+        <input type="text" id="inc-location" placeholder="Building, floor, department..." oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition" />
+      </div>
+      <div>
+        <label for="inc-type" class="block text-sm font-medium text-gray-700 mb-1">Incident Type</label>
+        <select id="inc-type" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition bg-white">
+          <option value="">Select type...</option>
+          <option>Injury / Illness</option>
+          <option>Property Damage</option>
+          <option>Equipment Failure</option>
+          <option>Environmental / Spill</option>
+          <option>Security Breach</option>
+          <option>Near Miss</option>
+          <option>Slip / Trip / Fall</option>
+          <option>Fire / Explosion</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Severity Level</label>
+        <div class="flex flex-wrap gap-2" id="severity-buttons">
+          <button onclick="setSeverity('Near Miss', this)" class="severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors">Near Miss</button>
+          <button onclick="setSeverity('Minor', this)" class="severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors">Minor</button>
+          <button onclick="setSeverity('Moderate', this)" class="severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors">Moderate</button>
+          <button onclick="setSeverity('Major', this)" class="severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors">Major</button>
+          <button onclick="setSeverity('Critical', this)" class="severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors">Critical</button>
+        </div>
+        <input type="hidden" id="severity-value" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Persons Involved -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-5 print-section">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">2</span>
+      Persons Involved
+    </h2>
+    <textarea id="persons" rows="3" placeholder="Names, roles, contact information..." oninput="saveDraft()"
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+  </div>
+
+  <!-- Section 3: Description -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-5 print-section">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">3</span>
+      Incident Description
+    </h2>
+    <div class="grid grid-cols-1 gap-4">
+      <div>
+        <label for="desc-who" class="block text-sm font-medium text-gray-700 mb-1">Who was involved?</label>
+        <textarea id="desc-who" rows="2" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+      </div>
+      <div>
+        <label for="desc-what" class="block text-sm font-medium text-gray-700 mb-1">What happened?</label>
+        <textarea id="desc-what" rows="3" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="desc-when" class="block text-sm font-medium text-gray-700 mb-1">When (sequence of events)?</label>
+          <textarea id="desc-when" rows="2" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+        </div>
+        <div>
+          <label for="desc-where" class="block text-sm font-medium text-gray-700 mb-1">Where exactly did it occur?</label>
+          <textarea id="desc-where" rows="2" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+        </div>
+      </div>
+      <div>
+        <label for="desc-how" class="block text-sm font-medium text-gray-700 mb-1">How did it happen?</label>
+        <textarea id="desc-how" rows="3" oninput="saveDraft()" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Immediate Actions -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-5 print-section">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">4</span>
+      Immediate Actions Taken
+    </h2>
+    <textarea id="immediate-actions" rows="3" oninput="saveDraft()" placeholder="First aid, evacuation, notifications, equipment lockout..."
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-400 transition resize-none"></textarea>
+  </div>
+
+  <!-- Section 5: 5 Whys -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-5 print-section">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+        <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">5</span>
+        Root Cause Analysis — 5 Whys
+      </h2>
+      <button onclick="addWhy()" class="no-print text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1.5 rounded-lg transition-colors">+ Add Why</button>
+    </div>
+    <p class="text-xs text-gray-500 mb-3">Start with the incident and ask "Why?" up to 5 times to find the root cause.</p>
+    <div id="whys-container" class="space-y-3"></div>
+  </div>
+
+  <!-- Section 6: Corrective Actions -->
+  <div class="bg-white rounded-2xl shadow p-6 mb-8 print-section">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+        <span class="bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold">6</span>
+        Corrective Actions
+      </h2>
+      <button onclick="addCorrective()" class="no-print text-sm bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded-lg transition-colors">+ Add Action</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr class="bg-gray-50 text-gray-600">
+          <th class="text-left px-3 py-2 font-medium">Action</th>
+          <th class="text-left px-3 py-2 font-medium">Responsible Party</th>
+          <th class="text-left px-3 py-2 font-medium">Target Date</th>
+          <th class="text-left px-3 py-2 font-medium">Status</th>
+          <th class="px-3 py-2 no-print"></th>
+        </tr></thead>
+        <tbody id="corrective-table"></tbody>
+      </table>
+    </div>
+    <button onclick="addCorrective()" class="no-print mt-2 w-full border-2 border-dashed border-gray-300 hover:border-green-400 text-gray-400 hover:text-green-500 py-2 rounded-lg text-sm transition-colors">+ Add row</button>
+  </div>
+</div>
+
+<script>
+let whyCount = 0, correctiveCount = 0;
+const severityColors = {
+  'Near Miss':'border-blue-400 bg-blue-50 text-blue-700',
+  'Minor':'border-yellow-400 bg-yellow-50 text-yellow-700',
+  'Moderate':'border-orange-400 bg-orange-50 text-orange-700',
+  'Major':'border-red-400 bg-red-50 text-red-700',
+  'Critical':'border-red-700 bg-red-100 text-red-900',
+};
+
+function setSeverity(val, btn) {
+  document.getElementById('severity-value').value = val;
+  document.querySelectorAll('.severity-btn').forEach(b => {
+    b.className = 'severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 border-gray-300 text-gray-600 transition-colors';
+  });
+  btn.className = `severity-btn px-4 py-2 rounded-full text-sm font-medium border-2 transition-colors ${severityColors[val]}`;
+  saveDraft();
+}
+
+function addWhy() {
+  if (whyCount >= 5) return;
+  whyCount++;
+  const div = document.createElement('div');
+  div.id = `why-${whyCount}`;
+  div.className = 'flex items-start gap-3';
+  div.innerHTML = `
+    <span class="mt-2.5 w-7 h-7 flex-shrink-0 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">W${whyCount}</span>
+    <input type="text" placeholder="Why did this happen?" oninput="saveDraft()"
+      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-400 transition" />
+    <button onclick="removeWhy(${whyCount})" class="no-print mt-2 text-gray-400 hover:text-red-500 transition text-lg" aria-label="Remove">×</button>
+  `;
+  document.getElementById('whys-container').appendChild(div);
+  saveDraft();
+}
+
+function removeWhy(id) {
+  document.getElementById(`why-${id}`)?.remove();
+  saveDraft();
+}
+
+function addCorrective() {
+  correctiveCount++;
+  const id = correctiveCount;
+  const tr = document.createElement('tr');
+  tr.id = `corr-${id}`;
+  tr.className = 'border-b border-gray-100';
+  tr.innerHTML = `
+    <td class="px-2 py-2"><input type="text" placeholder="Describe action..." oninput="saveDraft()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-green-400 min-w-[140px]" /></td>
+    <td class="px-2 py-2"><input type="text" placeholder="Name/Role" oninput="saveDraft()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-green-400 min-w-[100px]" /></td>
+    <td class="px-2 py-2"><input type="date" oninput="saveDraft()" class="border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-green-400" /></td>
+    <td class="px-2 py-2">
+      <select oninput="saveDraft()" class="border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-green-400 bg-white">
+        <option>Open</option>
+        <option>In Progress</option>
+        <option>Completed</option>
+        <option>Cancelled</option>
+      </select>
+    </td>
+    <td class="px-2 py-2 no-print">
+      <button onclick="document.getElementById('corr-${id}').remove(); saveDraft();" class="text-gray-400 hover:text-red-500 transition text-lg" aria-label="Remove">×</button>
+    </td>
+  `;
+  document.getElementById('corrective-table').appendChild(tr);
+}
+
+function getFormData() {
+  const whys = [];
+  document.querySelectorAll('[id^="why-"] input').forEach(el => whys.push(el.value));
+  const corrective = [];
+  document.querySelectorAll('[id^="corr-"]').forEach(tr => {
+    const cells = tr.querySelectorAll('input,select');
+    corrective.push({ action: cells[0]?.value, party: cells[1]?.value, date: cells[2]?.value, status: cells[3]?.value });
+  });
+  return {
+    date: document.getElementById('inc-date').value,
+    time: document.getElementById('inc-time').value,
+    location: document.getElementById('inc-location').value,
+    type: document.getElementById('inc-type').value,
+    severity: document.getElementById('severity-value').value,
+    persons: document.getElementById('persons').value,
+    descWho: document.getElementById('desc-who').value,
+    descWhat: document.getElementById('desc-what').value,
+    descWhen: document.getElementById('desc-when').value,
+    descWhere: document.getElementById('desc-where').value,
+    descHow: document.getElementById('desc-how').value,
+    immediateActions: document.getElementById('immediate-actions').value,
+    whys, corrective
+  };
+}
+
+function saveDraft() {
+  try { localStorage.setItem('incident_draft', JSON.stringify(getFormData())); } catch(e) {}
+}
+
+function loadDraft() {
+  // Add initial rows
+  addWhy(); addWhy(); addWhy();
+  addCorrective(); addCorrective();
+  document.getElementById('inc-date').value = new Date().toISOString().split('T')[0];
+
+  try {
+    const d = JSON.parse(localStorage.getItem('incident_draft') || 'null');
+    if (!d) return;
+    const set = (id, val) => { if (document.getElementById(id)) document.getElementById(id).value = val || ''; };
+    set('inc-date', d.date); set('inc-time', d.time); set('inc-location', d.location);
+    set('inc-type', d.type); set('persons', d.persons);
+    set('desc-who', d.descWho); set('desc-what', d.descWhat);
+    set('desc-when', d.descWhen); set('desc-where', d.descWhere); set('desc-how', d.descHow);
+    set('immediate-actions', d.immediateActions);
+    if (d.severity) {
+      const btn = [...document.querySelectorAll('.severity-btn')].find(b => b.textContent === d.severity);
+      if (btn) setSeverity(d.severity, btn);
+    }
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
